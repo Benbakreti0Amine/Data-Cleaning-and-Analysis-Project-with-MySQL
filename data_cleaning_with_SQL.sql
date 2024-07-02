@@ -164,7 +164,60 @@ select *
 from Company_year_rank
 where ranking < 5 ;
 
+-- Analysis: Average percentage of layoffs by industry
+SELECT industry, AVG(percentage_laid_off) AS avg_percentage_laid_off
+FROM layoffs_staging_2
+GROUP BY industry
+ORDER BY avg_percentage_laid_off DESC;
 
+-- Analysis: Total layoffs by year
+SELECT YEAR(`date`) AS year, SUM(total_laid_off) AS total_laid_off
+FROM layoffs_staging_2
+GROUP BY YEAR(`date`)
+ORDER BY year DESC;
+
+-- Analysis: Top 5 companies with the most layoffs
+SELECT company, SUM(total_laid_off) AS total_laid_off
+FROM layoffs_staging_2
+GROUP BY company
+ORDER BY total_laid_off DESC
+LIMIT 5;
+
+-- Analysis: Layoffs by stage of the company
+SELECT stage, SUM(total_laid_off) AS total_laid_off
+FROM layoffs_staging_2
+GROUP BY stage
+ORDER BY total_laid_off DESC;
+
+-- Analysis: Layoffs by country and industry
+SELECT country, industry, SUM(total_laid_off) AS total_laid_off
+FROM layoffs_staging_2
+GROUP BY country, industry
+ORDER BY total_laid_off DESC;
+
+-- Analysis: Monthly layoffs trend
+SELECT DATE_FORMAT(`date`, '%Y-%m') AS month, SUM(total_laid_off) AS total_laid_off
+FROM layoffs_staging_2
+GROUP BY DATE_FORMAT(`date`, '%Y-%m')
+ORDER BY month DESC;
+
+-- Analysis: 
+
+with Company_year(company,sum_total_laidoff,yearr) as
+(
+select company,Sum(total_laid_off), year(`date`) As yearr
+from layoffs_staging_2
+where total_laid_off is not null and year(`date`) is not null 
+group by company,year(`date`)
+),Company_year_rank as(
+select *, dense_rank() over( partition by yearr order by  sum_total_laidoff desc) as ranking
+from Company_year
+)
+select * 
+from Company_year_rank
+where ranking < 5 ;
+
+-- these are some example, i can add any more requests on demand
 
 
 
